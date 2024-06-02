@@ -15,16 +15,28 @@ export default () => {
 
   const [ repositories, setRepositories ] = React.useState([])
 
-  {
-    !isAuthenticated 
-    ? <Button onClick={() => loginWithRedirect()}>Sign In</Button>
-    : <Button onClick={() => logout()}>Sign Out</Button>
-    }
+  React.useEffect(() => {
+    if (isAuthenticated && user !== undefined) {
+      const makeRequest = async () => {
+        const query = `
+          query {
+            viewer {
+              repositories(first: 10) {
+                edges {
+                  node {
+                    name
+                    url
+                  }
+                }
+              }
+            }
+          }
+        `
 
-    <ul>
-    {repositories.map(({ name, url }) => (
-      <li key={name}><a href={url}>{name}</a></li>  
-    ))}
+        const request = {
+          user_id: user.sub,
+          query
+        }
 
         const result = await fetch(
           process.env.GATSBY_PROXY_URL || "",
